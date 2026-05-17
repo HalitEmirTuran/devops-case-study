@@ -1,0 +1,67 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: petclinic-postgres
+    environment:
+      POSTGRES_DB_FILE: /run/secrets/postgres.db
+      POSTGRES_USER_FILE: /run/secrets/postgres.user
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres.password
+    secrets:
+      - source: postgres_db
+        target: postgres.db
+      - source: postgres_user
+        target: postgres.user
+      - source: postgres_password
+        target: postgres.password
+    volumes:
+      - petclinic-postgres-data:/var/lib/postgresql/data
+    networks:
+      - petclinic-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$(cat /run/secrets/postgres.user)\" -d \"$$(cat /run/secrets/postgres.db)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    restart: unless-stopped
+
+  petclinic:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: petclinic-app
+    environment:
+      SPRING_PROFILES_ACTIVE: postgres
+      SPRING_CONFIG_IMPORT: optional:configtree:/run/secrets/
+    secrets:
+      - source: spring_datasource_url
+        target: spring.datasource.url
+      - source: postgres_user
+        target: spring.datasource.username
+      - source: postgres_password
+        target: spring.datasource.password
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - petclinic-network
+    restart: unless-stopped
+
+volumes:
+  petclinic-postgres-data:
+
+networks:
+  petclinic-network:
+    driver: bridge
+
+secrets:
+  postgres_db:
+    file: ../secrets/postgres.db
+  postgres_user:
+    file: ../secrets/postgres.user
+  postgres_password:
+    file: ../secrets/postgres.password
+  spring_datasource_url:
+    file: ../secrets/spring.datasource.url

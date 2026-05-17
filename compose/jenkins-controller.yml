@@ -1,0 +1,11 @@
+services:
+  jenkins:
+    image: jenkins/jenkins:lts-jdk21
+    container_name: petclinic-jenkins-controller
+    ports:
+      - "18080:8080"
+      - "50000:50000"
+    volumes:
+      - C:/jenkins-home:/var/jenkins_home
+    restart: unless-stopped
+    

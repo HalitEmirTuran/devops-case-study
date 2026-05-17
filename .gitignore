@@ -1,0 +1,27 @@
+# Secrets must never be committed
+secrets/*
+!secrets/.gitkeep
+
+# Local environment files
+.env
+.env.*
+*.local
+
+# Build outputs
+**/target/
+**/build/
+dist/
+
+# IDE files
+.idea/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Rendered/generated files
+rendered-manifests.yaml

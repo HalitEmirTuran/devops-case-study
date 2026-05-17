@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgres-network-policy
+  namespace: petclinic-prod
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: postgres
+      app.kubernetes.io/component: database
+  policyTypes:
+    - Ingress
+  ingress:
+    # Only Petclinic application pods can connect to PostgreSQL.
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: petclinic
+              app.kubernetes.io/component: application
+      ports:
+        - protocol: TCP
+          port: 5432

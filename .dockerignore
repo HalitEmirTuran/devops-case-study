@@ -1,0 +1,30 @@
+# Version control
+.git
+.github
+**/.git
+
+# Build artifacts
+**/target
+**/build
+
+# IDE
+**/.idea
+**/.vscode
+
+# Logs & OS
+**/*.log
+**/.DS_Store
+node_modules
+
+# DevOps - build context'e girmesine gerek yok
+terraform/
+ansible/
+helm/
+k8s/
+compose/
+scripts/
+docker/
+
+# Docs
+*.md
+LICENSE*
