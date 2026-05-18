@@ -62,7 +62,7 @@ pipeline {
                 if (Test-Path ".\\scripts\\install-metrics-server.ps1") {
                     .\\scripts\\install-metrics-server.ps1
                 } else {
-                    Write-Host "install-metrics-server.ps1 not found, skipping Metrics Server installation."
+                    Write-Host "install-metrics-server.ps1 NOT FOUND!!!, SKIPPING METRICS SERVER INSTALLATION!!!"
                 }
                 '''
             }
@@ -114,11 +114,9 @@ pipeline {
 
                     $SecretDir = ".jenkins-secrets"
                     New-Item -ItemType Directory -Force -Path $SecretDir | Out-Null
-
                     Set-Content -Path "$SecretDir\\postgres.db" -Value $env:POSTGRES_DB -NoNewline
                     Set-Content -Path "$SecretDir\\postgres.user" -Value $env:POSTGRES_USER -NoNewline
                     Set-Content -Path "$SecretDir\\postgres.password" -Value $env:POSTGRES_PASSWORD -NoNewline
-
                     kubectl create secret generic petclinic-db-secret `
                       --namespace $env:NAMESPACE `
                       --from-file=postgres.db="$SecretDir\\postgres.db" `
@@ -149,11 +147,11 @@ pipeline {
 
     post {
         success {
-            echo 'Pipeline completed successfully. Application is available at http://localhost:8080'
+            echo 'SUCCESS!!! PIPELINE COMPLETED. http://localhost:8080'
         }
 
         failure {
-            echo 'Pipeline failed. Check Jenkins console output and Kubernetes events.'
+            echo 'FAILED!!! PIPELINE FAILED. pls check Jenkins console output and Kubernetes logs'
             bat 'kubectl get pods -n %NAMESPACE%'
         }
 
