@@ -133,15 +133,25 @@ Below is the directory structure:
 *   **Declarative Infrastructure:** Optional platform step dynamically updates the local cluster configurations, installing the Nginx Ingress controller and Metrics Server.
 *   **Rollout Verification:** Once deployed, the pipeline runs automated validation routines waiting for rollouts and prints the live status of the deployment.
 
-## Step by Step Local Deployment Guide
+## Local Setup and Deployment Guide
 
-Follow these steps on a Windows machine (with PowerShell and Docker Desktop running) to set up and run the entire ecosystem locally.
+Follow these instructions on a Windows machine (with PowerShell and Docker Desktop running) to set up and run the entire ecosystem locally.
 
 ### Prerequisites
 *   [Docker Desktop](https://www.docker.com/products/docker-desktop/) (configured to run Linux containers)
 *   [Kind CLI](https://kind.sigs.k8s.io/)
 *   [Kubectl CLI](https://kubernetes.io/docs/tasks/tools/)
 *   PowerShell 7+ (Recommended)
+
+### 🚀 Option A: Fast Track (One Click Setup - Recommended)
+You can provision the entire local cluster, configure security settings, compile the application, deploy all resources to Kubernetes, and optionally start Jenkins using a single master bootstrap script at the root of the repository:
+```powershell
+.\start-all.ps1
+```
+This script handles all steps automatically, validates deployment states, and prints active access URLs when completed.
+
+### 📋 Option B: Step by Step Local Deployment
+If you prefer to set up the infrastructure and deploy resources manually step by step, follow the instructions below:
 
 ### Step 1: Initialize Local Secrets
 Run the script to generate secure database credentials locally:
@@ -286,15 +296,25 @@ Bu çalışmanın amacı konteyner tasarımı, yerel küme kurulumu, Kustomize y
 *   **Otomatik Küme Hazırlığı:** Opsiyonel bir parametre ile küme düzeyindeki Ingress Controller ve Metrics Server bileşenleri pipeline esnasında kurulup güncellenebilir.
 *   **Dağıtım Doğrulama:** Dağıtım sonrasında, dağıtımın başarıyla tamamlandığı doğrulanana kadar beklenir ve kümedeki tüm kaynakların güncel durumu ekrana basılır.
 
-## Adım Adım Yerel Dağıtım Kılavuzu
+## Yerel Kurulum ve Dağıtım Kılavuzu
 
-PowerShell ve Docker Desktop yüklü bir Windows bilgisayarda projeyi yerel olarak ayağa kaldırmak için aşağıdaki adımları sırasıyla uygulayın:
+PowerShell ve Docker Desktop yüklü bir Windows bilgisayarda projeyi yerel olarak ayağa kaldırmak için aşağıdaki yöntemlerden birini uygulayın:
 
 ### Gereksinimler
 *   [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Linux konteyner modunda aktif)
 *   [Kind CLI](https://kind.sigs.k8s.io/)
 *   [Kubectl CLI](https://kubernetes.io/docs/tasks/tools/)
 *   PowerShell 7+ (Önerilen)
+
+### 🚀 Yöntem A: Hızlı Başlangıç (Tek Tıkla Kurulum - Önerilen)
+Tüm yerel altyapıyı hazırlamak, güvenlik ayarlarını yapılandırmak, uygulamayı derlemek, Kubernetes'e dağıtmak ve opsiyonel olarak Jenkins sunucusunu/ajanını ayağa kaldırmak için depo kök dizinindeki tek bir ana orkestrasyon betiğini çalıştırabilirsiniz:
+```powershell
+.\start-all.ps1
+```
+Bu betik tüm adımları sırasıyla koşturur, dağıtım durumunu doğrular ve hazır olduğunda erişim adreslerini ekrana basar.
+
+### 📋 Yöntem B: Adım Adım Manuel Dağıtım
+Eğer tüm altyapıyı ve dağıtım adımlarını adım adım manuel olarak kurmak isterseniz, aşağıdaki adımları sırasıyla uygulayın:
 
 ### Adım 1: Yerel Şifreleri Oluşturun
 Rastgele ve güvenli veritabanı kimlik bilgilerini oluşturmak için betiği çalıştırın:
