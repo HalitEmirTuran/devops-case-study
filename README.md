@@ -185,11 +185,21 @@ This validates secrets, mounts them as a K8s secret, deploys the resources using
 This repository includes a pre configured local **Jenkins Controller** to automate the build, test, security scan, and Kubernetes deployment workflows.
 
 ### 1. Launching the Jenkins Controller
-Run Jenkins locally inside a Docker container:
+You can automatically start the Jenkins server, wait for it to become ready, and retrieve the initial admin password using the provided PowerShell script:
+```powershell
+.\scripts\start-jenkins.ps1
+```
+This script handles creating the persistent directory at `C:/jenkins-home` to keep your credentials and jobs safe, starting the container using Docker Compose, querying the local endpoint until Jenkins is up, and printing the initial admin password.
+
+Alternatively, you can stop the Jenkins server at any time using:
+```powershell
+.\scripts\stop-jenkins.ps1
+```
+
+If you prefer manual execution, you can run the Docker Compose commands directly:
 ```bash
 docker compose -f compose/jenkins-controller.yml up -d
 ```
-This mounts a persistent directory at `C:/jenkins-home` to keep your credentials, jobs, and configurations safe.
 Jenkins will be accessible in your browser at: [http://localhost:18080](http://localhost:18080)
 
 ### 2. Pipeline Configuration Prerequisites
@@ -324,11 +334,21 @@ Bu işlem tamamlandığında kümede çalışan tüm kaynaklar ve durumları Pow
 Bu depoda; derleme, test, güvenlik taraması ve Kubernetes dağıtım süreçlerini tamamen otomatize etmek üzere önceden yapılandırılmış bir **Jenkins Controller** yer almaktadır.
 
 ### 1. Jenkins Controller'ı Başlatma
-Jenkins'i Docker konteyneri olarak local bilgisayarınızda ayağa kaldırın:
+Jenkins sunucusunu otomatik olarak başlatmak, hazır olmasını beklemek ve ilk yönetici (admin) şifresini otomatik olarak ekrana yazdırmak için hazırlanan PowerShell betiğini çalıştırabilirsiniz:
+```powershell
+.\scripts\start-jenkins.ps1
+```
+Bu betik; `C:/jenkins-home` dizinini oluşturur, Docker Compose ile konteyneri ayağa kaldırır, Jenkins tamamen açılana kadar bağlantıyı sorgular ve ilk giriş için gerekli olan başlangıç şifresini ekrana basar.
+
+İstediğiniz zaman Jenkins sunucusunu durdurmak ve temizlemek için şu betiği kullanabilirsiniz:
+```powershell
+.\scripts\stop-jenkins.ps1
+```
+
+Eğer manuel olarak başlatmak isterseniz, Docker Compose komutunu doğrudan çalıştırabilirsiniz:
 ```bash
 docker compose -f compose/jenkins-controller.yml up -d
 ```
-Bu komut, Jenkins yapılandırmalarınızı, işlerinizi (jobs) ve şifrelerinizi korumak amacıyla `C:/jenkins-home` yolunda kalıcı (persistent) bir hacim oluşturur.
 Jenkins arayüzüne tarayıcınızdan şu adresten erişebilirsiniz: [http://localhost:18080](http://localhost:18080)
 
 ### 2. Pipeline Önkoşulları ve Yapılandırma
