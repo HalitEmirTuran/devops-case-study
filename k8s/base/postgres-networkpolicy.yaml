@@ -11,12 +11,21 @@ spec:
   policyTypes:
     - Ingress
   ingress:
-    # Only Petclinic application pods can connect to PostgreSQL.
+    # Allow Petclinic application pods to connect to PostgreSQL.
     - from:
         - podSelector:
             matchLabels:
               app.kubernetes.io/name: petclinic
               app.kubernetes.io/component: application
+      ports:
+        - protocol: TCP
+          port: 5432
+          
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: postgres
+              app.kubernetes.io/component: backup
       ports:
         - protocol: TCP
           port: 5432

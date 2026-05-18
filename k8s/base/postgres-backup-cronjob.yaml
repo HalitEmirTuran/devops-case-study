@@ -1,0 +1,78 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup
+  namespace: petclinic-prod
+  labels:
+    app.kubernetes.io/name: postgres
+    app.kubernetes.io/component: backup
+spec:
+  schedule: "0 2 * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: postgres
+            app.kubernetes.io/component: backup
+        spec:
+          restartPolicy: OnFailure
+          securityContext:
+            runAsUser: 70
+            runAsGroup: 70
+            runAsNonRoot: true
+            fsGroup: 70
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: postgres-backup
+              image: postgres:16-alpine
+              imagePullPolicy: IfNotPresent
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+              env:
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: petclinic-db-secret
+                      key: postgres.password
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  set -eu
+
+                  DB_USER="$(cat /etc/postgres-secrets/postgres.user)"
+                  DB_NAME="$(cat /etc/postgres-secrets/postgres.db)"
+                  BACKUP_FILE="/backup/petclinic-$(date +%Y%m%d-%H%M%S).dump"
+
+                  echo "Checking PostgreSQL connectivity..."
+                  pg_isready -h postgres -U "$DB_USER" -d "$DB_NAME"
+
+                  echo "Starting PostgreSQL backup..."
+                  pg_dump \
+                    -h postgres \
+                    -U "$DB_USER" \
+                    -d "$DB_NAME" \
+                    -F c \
+                    -f "$BACKUP_FILE"
+
+                  echo "Backup created successfully: $BACKUP_FILE"
+              volumeMounts:
+                - name: postgres-secret
+                  mountPath: /etc/postgres-secrets
+                  readOnly: true
+                - name: backup-storage
+                  mountPath: /backup
+          volumes:
+            - name: postgres-secret
+              secret:
+                secretName: petclinic-db-secret
+            - name: backup-storage
+              persistentVolumeClaim:
+                claimName: postgres-backup-pvc

@@ -24,6 +24,11 @@ spec:
         app.kubernetes.io/name: petclinic
         app.kubernetes.io/component: application
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: petclinic-app
           image: "localhost:5001/petclinic-app:v1.0.1-local"
@@ -75,6 +80,8 @@ spec:
               cpu: "750m"
               memory: "768Mi"
           securityContext:
+            runAsUser: 10001
+            runAsGroup: 10001
             runAsNonRoot: true
             allowPrivilegeEscalation: false
             capabilities:
