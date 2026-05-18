@@ -204,7 +204,11 @@ Jenkins will be accessible in your browser at: [http://localhost:18080](http://l
 
 ### 2. Pipeline Configuration Prerequisites
 To run the declarative `Jenkinsfile` successfully:
-1.  **Configure a Jenkins Agent:** The pipeline requires a Jenkins agent labeled `windows-docker` configured on your machine with Docker, Java, Maven, Trivy, and Kind CLIs installed.
+1.  **Configure a Jenkins Agent:** The pipeline requires a Jenkins agent labeled `windows-docker` configured on your machine with Docker, Java, Maven, Trivy, and Kind CLIs installed. You can automatically start this agent and connect it to the Jenkins controller using the provided script:
+    ```powershell
+    .\scripts\start-jenkins-agent.ps1
+    ```
+    On the first run, the script will prompt you for your agent's unique Secret Key (copied from the Jenkins UI) and save it securely in `secrets/jenkins-agent.secret` (gitignored). Subsequent executions will boot up the agent completely automatically.
 2.  **Add Credentials:** Inside the Jenkins UI under Credentials (`Manage Jenkins` -> `Credentials`), add the following String variables to securely provide parameters for the deployment:
     *   `petclinic-postgres-db` (Value e.g., `petclinic`)
     *   `petclinic-postgres-user` (Value e.g., `petclinic_app`)
@@ -353,7 +357,11 @@ Jenkins arayüzüne tarayıcınızdan şu adresten erişebilirsiniz: [http://loc
 
 ### 2. Pipeline Önkoşulları ve Yapılandırma
 `Jenkinsfile` içerisindeki deklaratif pipeline adımlarının başarıyla çalışması için:
-1.  **Jenkins Agent Yapılandırması:** Pipeline, bilgisayarınızda kurulu olan Docker, Java, Maven, Trivy ve Kind araçlarına erişimi olan `windows-docker` etiketine sahip bir Jenkins Agent'ı (temsilci) gerektirir.
+1.  **Jenkins Agent Yapılandırması:** Pipeline, bilgisayarınızda kurulu olan Docker, Java, Maven, Trivy ve Kind araçlarına erişimi olan `windows-docker` etiketine sahip bir Jenkins Agent'ı (temsilci) gerektirir. Ajanı otomatik olarak başlatmak ve controller'a bağlamak için hazırlanan betiği koşturabilirsiniz:
+    ```powershell
+    .\scripts\start-jenkins-agent.ps1
+    ```
+    İlk çalıştırmada betik size Jenkins UI'dan aldığınız benzersiz Secret Key değerini soracak ve bunu `secrets/jenkins-agent.secret` (gitignored) dosyasına kaydedecektir. Sonraki çalıştırmalarda ajan tamamen otomatik olarak başlayacaktır.
 2.  **Kimlik Bilgilerinin Tanımlanması (Credentials):** Jenkins arayüzünden (`Manage Jenkins` -> `Credentials` altından) aşağıdaki String (metin) değişkenlerini güvenli parametre olarak ekleyin:
     *   `petclinic-postgres-db` (Örn. `petclinic`)
     *   `petclinic-postgres-user` (Örn. `petclinic_app`)
