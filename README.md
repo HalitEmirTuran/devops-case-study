@@ -12,11 +12,11 @@ This system is engineered for local development and validation using **Kind (Kub
 
 ```mermaid
 graph TD
-    subgraph Local Machine
-        subgraph Kind Kubernetes Cluster (petclinic-prod)
+    subgraph "Local Machine"
+        subgraph "Kind Kubernetes Cluster (petclinic-prod)"
             ingress-nginx[NGINX Ingress Controller] -->|Path: /| app-svc[Application Service]
             
-            subgraph petclinic-prod Namespace
+            subgraph "petclinic-prod Namespace"
                 app-deploy[Petclinic App Deployment<br>Non-Root, Read-Only FS]
                 app-svc -->|Port 8080| app-deploy
                 
