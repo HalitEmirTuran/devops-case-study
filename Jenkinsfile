@@ -9,6 +9,14 @@ pipeline {
         disableConcurrentBuilds()
     }
 
+    parameters {
+        booleanParam(
+            name: 'RUN_PLATFORM_SETUP',
+            defaultValue: false,
+            description: 'Install or update cluster-level add-ons such as Ingress Controller and Metrics Server'
+        )
+    }
+
     environment {
         REGISTRY = 'localhost:5001'
         IMAGE_NAME = 'petclinic-app'
@@ -31,6 +39,32 @@ pipeline {
                 bat 'kind --version'
                 bat 'java -version'
                 bat 'git --version'
+                bat 'trivy --version'
+            }
+        }
+
+        stage('Setup Platform Add-ons') {
+            when {
+                expression { return params.RUN_PLATFORM_SETUP }
+            }
+            steps {
+                powershell '''
+                $ErrorActionPreference = "Stop"
+
+                Write-Host "Installing or updating platform add-ons..."
+
+                if (Test-Path ".\\scripts\\install-ingress.ps1") {
+                    .\\scripts\\install-ingress.ps1
+                } else {
+                    Write-Host "install-ingress.ps1 not found, skipping Ingress installation."
+                }
+
+                if (Test-Path ".\\scripts\\install-metrics-server.ps1") {
+                    .\\scripts\\install-metrics-server.ps1
+                } else {
+                    Write-Host "install-metrics-server.ps1 not found, skipping Metrics Server installation."
+                }
+                '''
             }
         }
 
@@ -45,6 +79,12 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 bat 'docker build -t %FULL_IMAGE_NAME% -f docker/Dockerfile .'
+            }
+        }
+
+        stage('Scan Docker Image with Trivy') {
+            steps {
+                bat 'trivy image --severity HIGH,CRITICAL --format table --output trivy-image-scan.txt %FULL_IMAGE_NAME%'
             }
         }
 
@@ -101,7 +141,7 @@ pipeline {
         stage('Verify Rollout') {
             steps {
                 bat 'kubectl rollout status deployment/petclinic-app -n %NAMESPACE% --timeout=180s'
-                bat 'kubectl get pods,svc,hpa,pdb,networkpolicy -n %NAMESPACE%'
+                bat 'kubectl get pods,svc,ingress,hpa,pdb,networkpolicy -n %NAMESPACE%'
                 bat 'kubectl describe deployment petclinic-app -n %NAMESPACE%'
             }
         }
@@ -118,7 +158,7 @@ pipeline {
         }
 
         always {
-            archiveArtifacts artifacts: 'rendered-manifests.yaml', allowEmptyArchive: true
+            archiveArtifacts artifacts: 'rendered-manifests.yaml,trivy-image-scan.txt', allowEmptyArchive: true
         }
     }
 }
