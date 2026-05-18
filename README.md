@@ -110,9 +110,11 @@ Below is the directory structure:
 
 ### 2. Kubernetes Architecture
 *   **Pod Security Standards (PSS):** Enforces `baseline` security policies and audits `restricted` rules at the namespace level.
-*   **Security Context Hardening:** Application containers feature a read only root filesystem (`readOnlyRootFilesystem: true`), dropped Linux capabilities (`ALL`), blocked privilege escalation, and runtime default seccomp profile configuration.
+*   **Security Context Hardening (app-deployment.yaml lines 27 to 31 and 82 to 96):** Application containers feature a read only root filesystem (`readOnlyRootFilesystem: true`), dropped Linux capabilities (`ALL`), blocked privilege escalation, and runtime default seccomp profile configuration.
 *   **Database Reliability:** PostgreSQL is deployed via a `StatefulSet` with robust `readiness` and `liveness` probes executing standard `pg_isready` checks using file based secrets.
-*   **Zero Downtime Releases:** Rolling update strategy guarantees continuous uptime during releases (`maxUnavailable: 0` and `maxSurge: 1`).
+*   **Zero Downtime Releases (app-deployment.yaml lines 12 to 16):** Rolling update strategy guarantees continuous uptime during releases (`maxUnavailable: 0` and `maxSurge: 1`).
+*   **Self Healing Probes (app-deployment.yaml lines 53 to 74):** Integrates startup, readiness, and liveness probes to monitor Spring Boot startup and container health, restarting failed pods automatically.
+*   **Resource Governance (app-deployment.yaml lines 75 to 81):** Guarantees CPU and memory limits (`requests` and `limits`) to ensure performance stability.
 *   **Scaling and High Availability:** 
     *   **Horizontal Pod Autoscaler (HPA)** automatically scales application k8s replicas dynamically up to 3 when CPU utilization crosses 70%.
     *   **Pod Disruption Budget (PDB)** prevents maintenance operations from bringing down all app k8s replicas at once (`minAvailable: 1`).
@@ -247,9 +249,11 @@ Bu çalışmanın amacı konteyner tasarımı, yerel küme kurulumu, Kustomize y
 
 ### 2. Kubernetes Mimarisi
 *   **Pod Güvenlik Standartları (PSS):** Namespace düzeyinde `baseline` güvenlik politikaları zorunlu kılınmış, `restricted` kuralları denetlenmiştir.
-*   **Sıkılaştırılmış Güvenlik Yetkileri (Security Context):** Uygulama podlarında salt okunur kök dosya sistemi (`readOnlyRootFilesystem: true`), Linux çekirdek yetkilerinin kaldırılması (`drop: [ALL]`), ayrıcalık yükseltme engeli ve varsayılan çalışma zamanı seccomp profili uygulanmıştır.
+*   **Sıkılaştırılmış Güvenlik Yetkileri (app-deployment.yaml 27 - 31 ve 82 - 96. satırlar):** Uygulama podlarında salt okunur kök dosya sistemi (`readOnlyRootFilesystem: true`), Linux çekirdek yetkilerinin kaldırılması (`drop: [ALL]`), ayrıcalık yükseltme engeli ve varsayılan çalışma zamanı seccomp profili uygulanmıştır.
 *   **Dayanıklı Veritabanı:** PostgreSQL, `StatefulSet` mimarisi ile kalıcı depolama birimi kullanılarak dağıtılmıştır. Sağlık durumu dosya tabanlı şifrelerle `pg_isready` aracıyla sürekli denetlenir.
-*   **Kesintisiz Güncelleme (Zero Downtime):** Güncellemelerde uygulama kesintisi sıfıra indirgenmiştir (`maxUnavailable: 0` ve `maxSurge: 1`).
+*   **Kesintisiz Güncelleme (app-deployment.yaml 12 - 16. satırlar):** Güncellemelerde uygulama kesintisi sıfıra indirgenmiştir (`maxUnavailable: 0` ve `maxSurge: 1`).
+*   **Kendi Kendini İyileştirme (app-deployment.yaml 53 - 74. satırlar):** Konteyner sağlığını izleyen startup, readiness ve liveness probelarını barındırır. Arızalı podları otomatik olarak yeniden başlatır.
+*   **Kaynak Yönetimi (app-deployment.yaml 75 - 81. satırlar):** Uygulamanın performansını garanti eden ve sunucuyu yormayan işlemci ve bellek sınırlarını (`requests` ve `limits`) tanımlar.
 *   **Ölçekleme ve Yüksek Erişilebilirlik:**
     *   **Yatay Pod Otomatik Ölçekleyici (HPA)**, CPU kullanımı %70'i aştığında pod kopyalarını otomatik olarak 3 adede kadar dinamik ölçekler.
     *   **Pod Kesinti Bütçesi (PDB)**, bakım süreçlerinde uygulamanın en az 1 kopyasının sürekli ayakta kalmasını garanti eder.
