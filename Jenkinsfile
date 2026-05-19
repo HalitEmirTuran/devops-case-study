@@ -128,6 +128,20 @@ pipeline {
 
                     kubectl apply -k k8s/base
 
+                    # Wait for PostgreSQL to be ready before syncing the password
+                    kubectl wait --for=condition=ready pod `
+                      -l app.kubernetes.io/name=postgres `
+                      -n $env:NAMESPACE `
+                      --timeout=180s
+
+                    # Sync the password inside PostgreSQL to match the current credential.
+                    # PostgreSQL only reads POSTGRES_PASSWORD_FILE during first-time init;
+                    # on re-deploys the PVC already has data so the old password persists.
+                    Write-Host "Syncing database credentials..."
+                    kubectl exec postgres-0 -n $env:NAMESPACE -- `
+                      psql -U $env:POSTGRES_USER -d $env:POSTGRES_DB `
+                        -c "ALTER USER $($env:POSTGRES_USER) WITH PASSWORD '$($env:POSTGRES_PASSWORD)';"
+
                     kubectl set image deployment/petclinic-app `
                       petclinic-app=$env:FULL_IMAGE_NAME `
                       -n $env:NAMESPACE

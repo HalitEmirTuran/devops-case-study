@@ -20,7 +20,7 @@ foreach ($File in $RequiredSecretFiles) {
     }
 }
 
-Write-Host "Creating or updating Kubernetes Secret..."
+Write-Host "Creating AND/or updating Kubernetes Secret..."
 
 kubectl create secret generic petclinic-db-secret `
   --namespace $Namespace `
@@ -39,6 +39,26 @@ kubectl wait --for=condition=ready pod `
   -l app.kubernetes.io/name=postgres `
   -n $Namespace `
   --timeout=180s
+
+# Sync the password inside PostgreSQL to match the current secret.
+# PostgreSQL only reads POSTGRES_PASSWORD_FILE during first-time init.
+# On subsequent runs the data volume already exists, so the DB keeps
+# the old password. This ALTER USER command keeps them in sync.
+Write-Host "Syncing database credentials with current secret..."
+
+$DbUser = Get-Content "secrets/postgres.user" -Raw
+$DbPassword = Get-Content "secrets/postgres.password" -Raw
+$DbName = Get-Content "secrets/postgres.db" -Raw
+
+kubectl exec postgres-0 -n $Namespace -- `
+  psql -U $DbUser -d $DbName -c "ALTER USER $DbUser WITH PASSWORD '$DbPassword';"
+
+Write-Host "Database credentials synced." -ForegroundColor Green
+
+# Restart the app deployment so pods pick up the new secret values.
+Write-Host "Restarting application pods to load updated credentials..."
+
+kubectl rollout restart deployment/petclinic-app -n $Namespace
 
 Write-Host "Waiting for Petclinic deployment rollout..."
 

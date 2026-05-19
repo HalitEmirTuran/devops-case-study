@@ -14,5 +14,5 @@ Set-Content -Path "$SecretsDir\postgres.user" -Value "petclinic_app" -NoNewline
 Set-Content -Path "$SecretsDir\postgres.password" -Value $Password -NoNewline
 Set-Content -Path "$SecretsDir\spring.datasource.url" -Value "jdbc:postgresql://postgres:5432/petclinic" -NoNewline
 
-Write-Host "B: Secrets basariyla olusturuldu:: ./secrets"
-Write-Host "U: Secrets altinda commitleme!:: ./secrets"
+Write-Host "Secrets generated successfully in ./secrets" -ForegroundColor Green
+Write-Host "WARNING: Do not commit the secrets/ directory!" -ForegroundColor Red
