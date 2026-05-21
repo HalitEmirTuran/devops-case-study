@@ -84,7 +84,46 @@ pipeline {
 
         stage('Scan Docker Image with Trivy') {
             steps {
-                bat 'trivy image --severity HIGH,CRITICAL --format table --output trivy-image-scan.txt %FULL_IMAGE_NAME%'
+                powershell '''
+                $ErrorActionPreference = "Stop"
+                [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
+                trivy image `
+                --severity HIGH,CRITICAL `
+                --format json `
+                --output trivy-image-scan.json `
+                $env:FULL_IMAGE_NAME
+
+                $scan = Get-Content trivy-image-scan.json -Raw | ConvertFrom-Json
+
+                $rows = foreach ($result in $scan.Results) {
+                    if ($result.Vulnerabilities) {
+                        foreach ($v in $result.Vulnerabilities) {
+                            [PSCustomObject]@{
+                                Target           = $result.Target
+                                Library          = $v.PkgName
+                                VulnerabilityID  = $v.VulnerabilityID
+                                Severity         = $v.Severity
+                                InstalledVersion = $v.InstalledVersion
+                                FixedVersion     = $v.FixedVersion
+                                Title            = $v.Title
+                            }
+                        }
+                    }
+                }
+
+                if ($rows) {
+                    $rows | Sort-Object Severity, Library |
+                        Format-Table -AutoSize |
+                        Out-String |
+                        Set-Content -Path trivy-image-scan-summary.txt -Encoding UTF8
+
+                    $rows | Export-Csv -Path trivy-image-scan.csv -NoTypeInformation -Encoding UTF8
+                } else {
+                    "No HIGH or CRITICAL vulnerabilities found." |
+                        Set-Content -Path trivy-image-scan-summary.txt -Encoding UTF8
+                }
+                '''
             }
         }
 
