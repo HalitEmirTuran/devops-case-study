@@ -86,9 +86,10 @@ pipeline {
             steps {
                 powershell '''
                 $ErrorActionPreference = "Stop"
-                [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 
                 trivy image `
+                --quiet `
+                --scanners vuln `
                 --severity HIGH,CRITICAL `
                 --format json `
                 --output trivy-image-scan.json `
@@ -113,12 +114,14 @@ pipeline {
                 }
 
                 if ($rows) {
-                    $rows | Sort-Object Severity, Library |
+                    $rows |
+                        Sort-Object Severity, Library |
                         Format-Table -AutoSize |
                         Out-String |
                         Set-Content -Path trivy-image-scan-summary.txt -Encoding UTF8
 
-                    $rows | Export-Csv -Path trivy-image-scan.csv -NoTypeInformation -Encoding UTF8
+                    $rows |
+                        Export-Csv -Path trivy-image-scan.csv -NoTypeInformation -Encoding UTF8
                 } else {
                     "No HIGH or CRITICAL vulnerabilities found." |
                         Set-Content -Path trivy-image-scan-summary.txt -Encoding UTF8
